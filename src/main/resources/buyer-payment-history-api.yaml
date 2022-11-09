@@ -1,0 +1,3340 @@
+swagger: '2.0'
+info:
+  version: '1.0'
+  title: 'CI: Risk - Buyer Payment History Experience API v1'
+  description: >-
+    This API optimises Buyer payment history information based on claims from CLEAR and CYC.
+    
+    ### API Owner
+    
+    **Name:** Cesar Herrera Garcia (temporary) <br>
+    **Email:** cesar.herreragarcia@atradius.com
+host: _apigw-host_
+basePath: /risk/buyer-payment-history-xp/v1
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+parameters:
+  OffsetParam:
+    in: query
+    name: offset
+    required: false
+    type: integer
+    format: int32
+    minimum: 0
+    description: The number of items to skip before starting to collect the result set.
+  LimitParam:
+    in: query
+    name: limit
+    required: false
+    type: integer
+    format: int32
+    minimum: 1
+    maximum: 200
+    default: 20
+    description: The numbers of items to return.
+  LanguageParam:
+    name: language_code
+    in: query
+    required: false
+    type: string
+    description: 'The language in which data may be returned'
+    default: 'EN'
+  EffectFromDateParam:
+    name: effect_from_date
+    in: query
+    required: false
+    type: string
+    format: date-time
+    description: "Effective from data. ISO8601 format [YYYY-MM-DDTHH:mi:ssZ]"
+  EffectToDateParam:
+    name: effect_to_date
+    in: query
+    required: false
+    type: string
+    format: date-time
+    description: "Effective to data. ISO8601 format [YYYY-MM-DDTHH:mi:ssZ]"
+
+  PointInTimeParam:
+    name: date
+    in: query
+    required: false
+    type: string
+    format: date
+    description: 'Point in time of the returned data. ISO8601 format [YYYY-MM-DDTHH:mi:ssZ]'
+  OrganisationIdPath:
+    name: org_id
+    in: path
+    required: true
+    type: integer
+    format: int32
+    description: Organisation identifier
+  SocialSecurityDebtIdPath:
+    name: social_security_debt_id
+    in: path
+    required: true
+    type: integer
+    format: int64
+    description: Social Security Debt identifier
+  SnaIdPath:
+    name: sna_id
+    in: path
+    required: true
+    type: integer
+    format: int64
+    description: 'SNA identifier'
+  SnaStatusPath:
+    name: sna_status
+    in: path
+    required: true
+    type: string
+    enum: [Accepted, Pending]
+    description: 'SNA Status Accepted / Pending'
+  SnaStatusBody:
+    name: body
+    in: body
+    required: true
+    description: ''
+    schema:
+      $ref: '#/definitions/SNAStatus'
+  # Headers
+  AtradiusOriginUserIdHeader:
+    name: Atradius-Origin-User-Id
+    in: header
+    required: true
+    type: string
+    description: 'Name of the user who is performing an action in a system (Note this is normally the login ID coming from the LDAP'
+  AtradiusOriginApplicationHeader:
+    name: Atradius-Origin-Application
+    in: header
+    required: true
+    type: string
+    description: 'Identification of the application which invoked the service'
+  AtradiusOriginServiceHeader:
+    name: Atradius-Origin-Service
+    in: header
+    required: true
+    type: string
+    description: 'The name of origin (parent) service which is invoked'
+  AtradiusInvocationServiceHeader:
+    name: Atradius-Invocation-Service
+    in: header
+    required: true
+    type: string
+    description: 'The invocation service URL'
+  AtradiusMessageTimestampHeader:
+    name: Atradius-Message-Timestamp
+    in: header
+    required: true
+    type: string
+    description: 'The timestamp when the client is invoked the origin service'
+  AtradiusMessageIdHeader:
+    name: Atradius-Message-Id
+    in: header
+    required: false
+    type: string
+    format: uuid
+    description: 'Unique identifier of the message that has been send'
+  AtradiusCorrelationIdHeader:
+    name: Atradius-Correlation-Id
+    in: header
+    required: false
+    type: string
+    format: uuid
+    description: 'Unique identifier of a transaction over various applications / components'
+  AtradiusConcurrencyControlVersionHeader:
+    name: Atradius-Concurrency-Control-Version
+    in: header
+    required: false
+    type: string
+    description: 'A placeholder were we can store a string with relevant information to perform in the data store the verification of the optimistic concurrency control. Block to capture the information which might be required as part of the Optimistic concurrency control (OCC) which is a concurrency control method applied to transactional systems.'
+
+paths:
+  /buyer-payment-history/{org_id}/negative-information/summary:
+    x-summary: Get Buyer Negative Information Summary
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - Negative Information
+      description: This endopoint returns the information for the negative information section in the Buyer 360 Overview tab.
+      summary: Get Buyer Negative Information Summary
+      operationId: GetBuyerNegativeInformationSummary
+      deprecated: false
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/OrganisationIdPath'
+        - name: currency_code
+          in: query
+          required: true
+          type: string
+          description: The currency in which all amounts will be returned
+          maxLength: 3
+        - $ref: '#/parameters/PointInTimeParam'
+        - name: language_code
+          in: query
+          required: false
+          type: string
+          description: The language in which data may be returned
+          maxLength: 2
+        # Header
+        - $ref: '#/parameters/AtradiusOriginUserIdHeader'
+        - $ref: '#/parameters/AtradiusOriginApplicationHeader'
+        - $ref: '#/parameters/AtradiusOriginServiceHeader'
+        - $ref: '#/parameters/AtradiusInvocationServiceHeader'
+        - $ref: '#/parameters/AtradiusMessageTimestampHeader'
+        - $ref: '#/parameters/AtradiusMessageIdHeader'
+        - $ref: '#/parameters/AtradiusCorrelationIdHeader'
+        - $ref: '#/parameters/AtradiusConcurrencyControlVersionHeader'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/NegativeInformationSummary'
+          examples:
+            application/json:
+              aggregate:
+                claims_paid:
+                  count: 2
+                  amount: 1000.99
+              cyc_claims:
+                claims_submitted:
+                  count: 1
+                  amount: 10000.88
+                extension:
+                  count: 1
+                  amount: 50000.23
+                dispute_cases:
+                  count: 3
+                  amount: 35000
+                non_payment_notice:
+                  count: 2
+                  amount: 3445.33
+              atradius_claims:
+                claims_submitted:
+                  count: 1
+                  amount: 10000.88
+                dispute_cases:
+                  count: 3
+                  amount: 35000
+                non_payment_notice:
+                  count: 2
+                  amount: 3445.33
+              new_claims:
+                new: true
+                visibility: view
+              unpaid_debts:
+                visibility: view
+                new: true
+              ssx_rating:
+                visibility: view
+                new: true
+                rating: 6
+              social_security_debts:
+                visibility: view
+                new: true
+              sna_alerts:
+                sna_alert_flag: true
+                sna_notes:
+                  - org_id: 12345678
+                    short_name: KPN
+                  - org_id: 567345678
+                    short_name: LKKPN
+              supression_date:
+                visibility: view
+                date: "2021-03-21T00:00:00.000Z"
+          headers: {}
+        '400':
+          description: 'Request failed due to input validation error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '403':
+          description: 'Not authorised.'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '500':
+          description: 'Error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '405':
+          description: 'Method Not Supported'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+  /buyer-payment-history/{org_id}/external-info/tabs:
+    x-summary: Get (Tabs to be displayed)
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - External Information
+      description: 'This operation returns the tabs to be displayed for external information of buyer'
+      summary: Get Buyer External Info Tabs
+      operationId: GetBuyerExternalInfoTabs
+      deprecated: false
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/OrganisationIdPath'
+        # Header
+        - $ref: '#/parameters/AtradiusOriginUserIdHeader'
+        - $ref: '#/parameters/AtradiusOriginApplicationHeader'
+        - $ref: '#/parameters/AtradiusOriginServiceHeader'
+        - $ref: '#/parameters/AtradiusInvocationServiceHeader'
+        - $ref: '#/parameters/AtradiusMessageTimestampHeader'
+        - $ref: '#/parameters/AtradiusMessageIdHeader'
+        - $ref: '#/parameters/AtradiusCorrelationIdHeader'
+        - $ref: '#/parameters/AtradiusConcurrencyControlVersionHeader'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/ExternalInfoTabs'
+          examples:
+            application/json:
+              social_security: true
+              unpaid_debts: true
+              sna: true
+          headers: {}
+        '400':
+          description: 'Request failed due to input validation error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '403':
+          description: 'Not authorised.'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '500':
+          description: 'Error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '405':
+          description: 'Method Not Supported'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+  /buyer-payment-history/{org_id}/external-info/social-security-debts:
+    x-summary: Get / Create (Social Security Debts)
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - External Information - Social Security Debt
+      description: 'This operation returns a list of social security debts for buyer in Belgium'
+      summary: Get Buyer Social Security Debts
+      operationId: GetBuyerSocialSecurityDebts
+      deprecated: false
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        # Path
+        - $ref: '#/parameters/OrganisationIdPath'
+
+        # Param
+        - $ref: '#/parameters/EffectFromDateParam'
+        - $ref: '#/parameters/EffectToDateParam'
+        - $ref: '#/parameters/LanguageParam'
+        - $ref: '#/parameters/OffsetParam'
+        - $ref: '#/parameters/LimitParam'
+        - name: sort
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
+            enum: ['effect_from_dat+', 'effect_from_dat-', 'effect_to_dat+', 'effect_to_dat-']
+          description: 'Array of fields to sort on.'
+          default: ['effect_from_dat-']
+
+        # Headers
+        # Header
+        - $ref: '#/parameters/AtradiusOriginUserIdHeader'
+        - $ref: '#/parameters/AtradiusOriginApplicationHeader'
+        - $ref: '#/parameters/AtradiusOriginServiceHeader'
+        - $ref: '#/parameters/AtradiusInvocationServiceHeader'
+        - $ref: '#/parameters/AtradiusMessageTimestampHeader'
+        - $ref: '#/parameters/AtradiusMessageIdHeader'
+        - $ref: '#/parameters/AtradiusCorrelationIdHeader'
+        - $ref: '#/parameters/AtradiusConcurrencyControlVersionHeader'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BuyerSocialSecurityDebtsPaginated'
+          examples:
+            application/json:
+              response:
+                -  social_security_debt_id: 267
+                   reception_date: "1997-05-28"
+                   close_date: "1997-05-25"
+                   trimester: 197
+                   amount_overdue: 32483
+                   dispute: N
+                   free_text: "Free text 1"
+                -  social_security_debt_id: 268
+                   reception_date: "1997-04-02"
+                   close_date: "1997-04-01"
+                   trimester: 297
+                   amount_overdue: 81008
+                   dispute: Y
+                   free_text: "Free text 2"
+                -  social_security_debt_id: 269
+                   reception_date: "1996-04-11"
+                   close_date: "1996-04-10"
+                   trimester: 396
+                   amount_overdue: 108153
+                   dispute: N
+                   free_text: "Free text 3"
+                -  social_security_debt_id: 270
+                   reception_date: "1996-04-11"
+                   close_date: "1996-04-10"
+                   trimester: 496
+                   amount_overdue: 78895
+                   dispute: Y
+                   free_text: "Free text 4"
+                -  social_security_debt_id: 271
+                   reception_date: "1996-04-11"
+                   close_date: "1996-04-10"
+                   trimester: 296
+                   amount_overdue: 19373
+                   dispute: N
+                   free_text: "Free text 5"
+                -  social_security_debt_id: 272
+                   reception_date: "1996-04-11"
+                   close_date: "1996-04-10"
+                   trimester: 196
+                   amount_overdue: 0
+                   dispute: N
+                   free_text: "Free text 6"
+                -  social_security_debt_id: 273
+                   reception_date: "1996-04-11"
+                   close_date: "1996-04-10"
+                   trimester: 496
+                   amount_overdue: 12323
+                   dispute: N
+                   free_text: "Free text 7"
+                -  social_security_debt_id: 274
+                   reception_date: "1996-04-11"
+                   close_date: "1996-04-10"
+                   trimester: 196
+                   amount_overdue: 0
+                   dispute: N
+                   free_text: "Free text 8"
+                -  social_security_debt_id: 275
+                   reception_date: "1996-04-11"
+                   close_date: "1996-04-10"
+                   trimester: 496
+                   amount_overdue: 0
+                   dispute: N
+                   free_text: "Free text 9"
+                -  social_security_debt_id: 276
+                   reception_date: "1996-04-11"
+                   close_date: "1996-04-10"
+                   trimester: 396
+                   amount_overdue: 0
+                   dispute: Y
+                   free_text: "Free text 10"
+                -  social_security_debt_id: 277
+                   reception_date: "1996-04-11"
+                   close_date: "1996-04-10"
+                   trimester: 296
+                   amount_overdue: 0
+                   dispute: true
+                   free_text: "0"
+                -  social_security_debt_id: 278
+                   reception_date: "1996-04-11"
+                   close_date: "1996-04-10"
+                   trimester: 196
+                   amount_overdue: 0
+                   dispute: N
+                   free_text: "abcdefghij klmnopq rstuvwxyz"
+                -  social_security_debt_id: 279
+                   reception_date: "1996-04-11"
+                   close_date: "1996-04-10"
+                   trimester: 496
+                   amount_overdue: 0
+                   dispute: N
+                   free_text: "0"
+                -  social_security_debt_id: 280
+                   reception_date: "1996-04-11"
+                   close_date: "1996-04-10"
+                   trimester: 396
+                   amount_overdue: 0
+                   dispute: N
+                   free_text: "0"
+                -  social_security_debt_id: 281
+                   reception_date: "1996-04-11"
+                   close_date: "1996-04-10"
+                   trimester: 296
+                   amount_overdue: 0
+                   dispute: N
+                   free_text: "0"
+              total_results: 72
+              count: 50
+              has_more: true
+              limit: 50
+              offset: 0
+          headers: {}
+        '400':
+          description: 'Request failed due to input validation error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '403':
+          description: 'Not authorised.'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '500':
+          description: 'Error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '405':
+          description: 'Method Not Supported'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+    post:
+      security:
+        - Bearer: []
+      tags:
+        - External Information - Social Security Debt
+      description: 'This operation creates social security debts for buyer in Belgium'
+      summary: Create Buyer Social Security Debt
+      operationId: CreateBuyerSocialSecurityDebt
+      deprecated: false
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/OrganisationIdPath'
+        # Header
+        - $ref: '#/parameters/AtradiusOriginUserIdHeader'
+        - $ref: '#/parameters/AtradiusOriginApplicationHeader'
+        - $ref: '#/parameters/AtradiusOriginServiceHeader'
+        - $ref: '#/parameters/AtradiusInvocationServiceHeader'
+        - $ref: '#/parameters/AtradiusMessageTimestampHeader'
+        - $ref: '#/parameters/AtradiusMessageIdHeader'
+        - $ref: '#/parameters/AtradiusCorrelationIdHeader'
+        - $ref: '#/parameters/AtradiusConcurrencyControlVersionHeader'
+        - name: body
+          in: body
+          required: true
+          description: ''
+          schema:
+            $ref: '#/definitions/BuyerSocialSecurityDebt'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/BuyerSocialSecurityDebt'
+          examples:
+            application/json:
+              social_security_debt_id: 282
+              reception_date: "2021-05-28"
+              close_date: "2021-05-25"
+              trimester: 121
+              amount_overdue: 12000
+              dispute: Y
+              free_text: "New line"
+          headers: {}
+        '400':
+          description: 'Request failed due to input validation error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '403':
+          description: 'Not authorised.'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '500':
+          description: 'Error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '405':
+          description: 'Method Not Supported'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+  /buyer-payment-history/{org_id}/external-info/social-security-debts/{social_security_debt_id}:
+    x-summary: Update / Delete (Social Security Debts)
+    put:
+      security:
+        - Bearer: []
+      tags:
+        - External Information - Social Security Debt
+      description: 'This operation updates a social security debt for buyer in Belgium'
+      summary: Update Buyer Social Security Debt
+      operationId: UpdateBuyerSocialSecurityDebt
+      deprecated: false
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/OrganisationIdPath'
+        - $ref: '#/parameters/SocialSecurityDebtIdPath'
+        # Header
+        - $ref: '#/parameters/AtradiusOriginUserIdHeader'
+        - $ref: '#/parameters/AtradiusOriginApplicationHeader'
+        - $ref: '#/parameters/AtradiusOriginServiceHeader'
+        - $ref: '#/parameters/AtradiusInvocationServiceHeader'
+        - $ref: '#/parameters/AtradiusMessageTimestampHeader'
+        - $ref: '#/parameters/AtradiusMessageIdHeader'
+        - $ref: '#/parameters/AtradiusCorrelationIdHeader'
+        - $ref: '#/parameters/AtradiusConcurrencyControlVersionHeader'
+        - name: body
+          in: body
+          required: true
+          description: ''
+          schema:
+            $ref: '#/definitions/BuyerSocialSecurityDebt'
+      responses:
+        '201':
+          description: ''
+          schema:
+            $ref: '#/definitions/BuyerSocialSecurityDebt'
+          headers: {}
+        '400':
+          description: 'Request failed due to input validation error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '403':
+          description: 'Not authorised.'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '500':
+          description: 'Error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '405':
+          description: 'Method Not Supported'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+    delete:
+      security:
+        - Bearer: []
+      tags:
+        - External Information - Social Security Debt
+      description: 'This operation deletes a social security debt for buyer'
+      summary: Delete Buyer Social Security Debt
+      operationId: DeleteBuyerSocialSecurityDebt
+      deprecated: false
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/OrganisationIdPath'
+        - $ref: '#/parameters/SocialSecurityDebtIdPath'
+        # Header
+        - $ref: '#/parameters/AtradiusOriginUserIdHeader'
+        - $ref: '#/parameters/AtradiusOriginApplicationHeader'
+        - $ref: '#/parameters/AtradiusOriginServiceHeader'
+        - $ref: '#/parameters/AtradiusInvocationServiceHeader'
+        - $ref: '#/parameters/AtradiusMessageTimestampHeader'
+        - $ref: '#/parameters/AtradiusMessageIdHeader'
+        - $ref: '#/parameters/AtradiusCorrelationIdHeader'
+        - $ref: '#/parameters/AtradiusConcurrencyControlVersionHeader'
+      responses:
+        '204':
+          description: ''
+          headers: {}
+        '400':
+          description: 'Request failed due to input validation error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '403':
+          description: 'Not authorised.'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '500':
+          description: 'Error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '405':
+          description: 'Method Not Supported'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+  /buyer-payment-history/{org_id}/external-info/unpaid-debts/summary:
+    x-summary: Get (Unpaid Debts Summary)
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - External Information - Unpaid debts
+      description: 'This operation returns summary of outstanding unpaid debts (per month) for buyer, where buyer country is France or any of the French territories'
+      summary: Get Buyer Unpaid Debts Summary
+      operationId: GetBuyerUnpaidDebtsSummary
+      deprecated: false
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/OrganisationIdPath'
+        # Header
+        - $ref: '#/parameters/AtradiusOriginUserIdHeader'
+        - $ref: '#/parameters/AtradiusOriginApplicationHeader'
+        - $ref: '#/parameters/AtradiusOriginServiceHeader'
+        - $ref: '#/parameters/AtradiusInvocationServiceHeader'
+        - $ref: '#/parameters/AtradiusMessageTimestampHeader'
+        - $ref: '#/parameters/AtradiusMessageIdHeader'
+        - $ref: '#/parameters/AtradiusCorrelationIdHeader'
+        - $ref: '#/parameters/AtradiusConcurrencyControlVersionHeader'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BuyerExternalUnpaidDebtsSummary'
+          examples:
+            application/json:
+              suppression_date: '2021-08-29'
+              ssx_rating: 10
+              ssx_flag: false
+              ip:
+                - duration: 'May-21'
+                  rating:
+                    count: 2
+                    amount: 12000
+                - duration: 'Apr-21'
+                  rating:
+                    count: 1
+                    amount: 12000
+                - duration: 'Mar-21'
+                  rating:
+                    count: 2
+                    amount: 12000
+                - duration: 'Feb-21'
+                  rating:
+                    count: 1
+                    amount: 16000
+                - duration: 'Jan-21'
+                  rating:
+                    count: 3
+                    amount: 11000
+                - duration: 'Dec-20'
+                  rating:
+                    count: 1
+                    amount: 5000
+                - duration: 'Nov-20'
+                  rating:
+                    count: 1
+                    amount: 5000
+                - duration: 'Oct-20'
+                  rating:
+                    count: 5
+                    amount: 7000
+                - duration: 'Sep-20'
+                  rating:
+                    count: 3
+                    amount: 8000
+                - duration: 'Aug-20'
+                  rating:
+                    count: 1
+                    amount: 5000
+                - duration: 'Jul-20'
+                  rating:
+                    count: 1
+                    amount: 5000
+                - duration: 'Jun-20'
+                  rating:
+                    count: 5
+                    amount: 7000
+                - duration: 'May-20'
+                  rating:
+                    count: 3
+                    amount: 8000
+              cc:
+                - duration: 'May-21'
+                  rating:
+                    count: 3
+                    amount: 8000
+                - duration: 'Apr-21'
+                  rating:
+                    count: 1
+                    amount: 10000
+                - duration: 'Mar-21'
+                  rating:
+                    count: 4
+                    amount: 11000
+                - duration: 'Feb-21'
+                  rating:
+                    count: 1
+                    amount: 14000
+                - duration: 'Jan-21'
+                  rating:
+                    count: 2
+                    amount: 15000
+                - duration: 'Dec-20'
+                  rating:
+                    count: 5
+                    amount: 6000
+                - duration: 'Nov-20'
+                  rating:
+                    count: 3
+                    amount: 15000
+                - duration: 'Oct-20'
+                  rating:
+                    count: 5
+                    amount: 17000
+                - duration: 'Sep-20'
+                  rating:
+                    count: 3
+                    amount: 4000
+                - duration: 'Aug-20'
+                  rating:
+                    count: 1
+                    amount: 5000
+                - duration: 'Jul-20'
+                  rating:
+                    count: 1
+                    amount: 5000
+                - duration: 'Jun-20'
+                  rating:
+                    count: 5
+                    amount: 7000
+                - duration: 'May-20'
+                  rating:
+                    count: 3
+                    amount: 8000
+              ssx_rating_monthly:
+                - duration: 'May-21'
+                  rating: 10
+                - duration: 'Apr-21'
+                  rating: 30
+                - duration: 'Mar-21'
+                  rating: 10
+                - duration: 'Feb-21'
+                  rating: 20
+                - duration: 'Jan-21'
+                  rating: 10
+                - duration: 'Dec-20'
+                  rating: 30
+                - duration: 'Nov-20'
+                  rating: 10
+                - duration: 'Oct-20'
+                  rating: 5
+                - duration: 'Sep-20'
+                  rating: 20
+                - duration: 'Aug-20'
+                  rating: 10
+                - duration: 'Jul-20'
+                  rating: 20
+                - duration: 'Jun-20'
+                  rating: 10
+                - duration: 'May-20'
+                  rating: 20
+          headers: {}
+        '400':
+          description: 'Request failed due to input validation error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '403':
+          description: 'Not authorised.'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '500':
+          description: 'Error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '405':
+          description: 'Method Not Supported'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+  /buyer-payment-history/{org_id}/external-info/unpaid-debts/details:
+    x-summary: Get (Unpaid Debts Details)
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - External Information - Unpaid debts
+      description: 'This operation returns details of outstanding unpaid debts (per month) of buyer, , where buyer country is France or any of the French territories'
+      summary: Get Buyer Unpaid Debts Details
+      operationId: GetBuyerUnpaidDebtsDetails
+      deprecated: false
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/OrganisationIdPath'
+        # Header
+        - $ref: '#/parameters/AtradiusOriginUserIdHeader'
+        - $ref: '#/parameters/AtradiusOriginApplicationHeader'
+        - $ref: '#/parameters/AtradiusOriginServiceHeader'
+        - $ref: '#/parameters/AtradiusInvocationServiceHeader'
+        - $ref: '#/parameters/AtradiusMessageTimestampHeader'
+        - $ref: '#/parameters/AtradiusMessageIdHeader'
+        - $ref: '#/parameters/AtradiusCorrelationIdHeader'
+        - $ref: '#/parameters/AtradiusConcurrencyControlVersionHeader'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BuyerExternalUnpaidDebtsDetailsPaginated'
+          examples:
+            application/json:
+              response:
+                - record_date: '2021-05-12'
+                  effect_from: '2021-05-05'
+                  effect_to: '2026-12-12'
+                  ssx_rating: 12
+                  code: 'I'
+                  ip_not_accept_code_0:
+                    count: 2
+                    amount: 11000
+                  ip_accept_code_1:
+                    count: 1
+                    amount: 18000
+                  ip_bao_code_2:
+                    count:
+                    amount:
+                  cc_not_accept_code_0:
+                    count: 2
+                    amount: 18000
+                  cc_accept_code_1:
+                    count: 2
+                    amount: 16000
+                  cc_bao_code_2:
+                    count: 2
+                    amount: 12000
+                - record_date: '2021-04-24'
+                  effect_from: '2021-04-24'
+                  effect_to:
+                  ssx_rating: 30
+                  code: 'D'
+                  ip_not_accept_code_0:
+                    count: 1
+                    amount: 6000
+                  ip_accept_code_1:
+                    count:
+                    amount:
+                  ip_bao_code_2:
+                    count: 2
+                    amount: 12000
+                  cc_not_accept_code_0:
+                    count: 2
+                    amount: 14000
+                  cc_accept_code_1:
+                    count:
+                    amount:
+                  cc_bao_code_2:
+                    count: 3
+                    amount: 32000
+                - record_date: '2021-02-11'
+                  effect_from: '2021-02-11'
+                  effect_to: '2028-12-12'
+                  ssx_rating: 12
+                  code: 'I'
+                  ip_not_accept_code_0:
+                    count: 2
+                    amount: 11000
+                  ip_accept_code_1:
+                    count: 1
+                    amount: 9000
+                  ip_bao_code_2:
+                    count: 2
+                    amount: 12000
+                  cc_not_accept_code_0:
+                    count:
+                    amount:
+                  cc_accept_code_1:
+                    count: 2
+                    amount: 18000
+                  cc_bao_code_2:
+                    count:
+                    amount:
+                - record_date: '2020-12-12'
+                  effect_from: '2020-12-24'
+                  effect_to:
+                  ssx_rating: 30
+                  code: 'M'
+                  ip_not_accept_code_0:
+                    count:
+                    amount:
+                  ip_accept_code_1:
+                    count:
+                    amount:
+                  ip_bao_code_2:
+                    count: 2
+                    amount: 12000
+                  cc_not_accept_code_0:
+                    count: 2
+                    amount: 14000
+                  cc_accept_code_1:
+                    count:
+                    amount:
+                  cc_bao_code_2:
+                    count: 1
+                    amount: 11000
+                - record_date: '2020-09-26'
+                  effect_from: '2020-09-30'
+                  effect_to:
+                  ssx_rating: 30
+                  code: 'D'
+                  ip_not_accept_code_0:
+                    count: 1
+                    amount: 12000
+                  ip_accept_code_1:
+                    count:
+                    amount:
+                  ip_bao_code_2:
+                    count: 2
+                    amount: 12000
+                  cc_not_accept_code_0:
+                    count: 2
+                    amount: 14000
+                  cc_accept_code_1:
+                    count:
+                    amount:
+                  cc_bao_code_2:
+                    count: 2
+                    amount: 16000
+                - record_date: '2020-03-15'
+                  effect_from: '2020-03-15'
+                  effect_to: '2020-03-15'
+                  ssx_rating: 20
+                  code: 'I'
+                  ip_not_accept_code_0:
+                    count: 2
+                    amount: 12000
+                  ip_accept_code_1:
+                    count: 2
+                    amount: 12000
+                  ip_bao_code_2:
+                    count: 2
+                    amount: 12000
+                  cc_not_accept_code_0:
+                    count: 2
+                    amount: 12000
+                  cc_accept_code_1:
+                    count: 2
+                    amount: 12000
+                  cc_bao_code_2:
+                    count: 2
+                    amount: 12000
+                - record_date: '2020-03-15'
+                  effect_from: '2020-03-15'
+                  effect_to: '2020-03-15'
+                  ssx_rating: 20
+                  code: 'I'
+                  ip_not_accept_code_0:
+                    count: 2
+                    amount: 12000
+                  ip_accept_code_1:
+                    count: 2
+                    amount: 12000
+                  ip_bao_code_2:
+                    count: 2
+                    amount: 12000
+                  cc_not_accept_code_0:
+                    count: 2
+                    amount: 12000
+                  cc_accept_code_1:
+                    count: 2
+                    amount: 12000
+                  cc_bao_code_2:
+                    count: 2
+                    amount: 12000
+                - record_date: '2020-03-15'
+                  effect_from: '2020-03-15'
+                  effect_to: '2020-03-15'
+                  ssx_rating: 20
+                  code: 'I'
+                  ip_not_accept_code_0:
+                    count: 2
+                    amount: 12000
+                  ip_accept_code_1:
+                    count: 2
+                    amount: 12000
+                  ip_bao_code_2:
+                    count: 2
+                    amount: 12000
+                  cc_not_accept_code_0:
+                    count: 2
+                    amount: 12000
+                  cc_accept_code_1:
+                    count: 2
+                    amount: 12000
+                  cc_bao_code_2:
+                    count: 2
+                    amount: 12000
+              total_results: 72
+              count: 50
+              has_more: true
+              limit: 50
+              offset: 0
+          headers: {}
+        '400':
+          description: 'Request failed due to input validation error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '403':
+          description: 'Not authorised.'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '500':
+          description: 'Error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '405':
+          description: 'Method Not Supported'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+  /buyer-payment-history/{org_id}/external-info/privileges/summary:
+    x-summary: Get (Privileges Summary)
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - External Information - Unpaid debts
+      description: 'This operation returns summary of buyer privileges, where buyer country is France or any of the French territories'
+      summary: Get Buyer Privileges Summary
+      operationId: GetBuyerPrivilegesSummary
+      deprecated: false
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/OrganisationIdPath'
+        # Header
+        - $ref: '#/parameters/AtradiusOriginUserIdHeader'
+        - $ref: '#/parameters/AtradiusOriginApplicationHeader'
+        - $ref: '#/parameters/AtradiusOriginServiceHeader'
+        - $ref: '#/parameters/AtradiusInvocationServiceHeader'
+        - $ref: '#/parameters/AtradiusMessageTimestampHeader'
+        - $ref: '#/parameters/AtradiusMessageIdHeader'
+        - $ref: '#/parameters/AtradiusCorrelationIdHeader'
+        - $ref: '#/parameters/AtradiusConcurrencyControlVersionHeader'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BuyerPrivilegesSummary'
+          examples:
+            application/json:
+              publication_date: '2021-05-12'
+              end_of_monitoring: '2021-12-12'
+              latest_inscriptions_tresor:
+                description: 'TRESOR'
+                amount: 125000
+                date_inscription: '2021-05-12'
+              latest_inscriptions_urssaf:
+                description: 'URSSAF'
+                amount: 155000
+                date_inscription: '2020-03-12'
+              aggregated_inscriptions_tresor:
+                description: 'TRESOR'
+                number: 8
+                amount: 125000
+              aggregated_inscriptions_urssaf:
+                description: 'URSSAF'
+                number: 12
+                amount: 155000
+          headers: {}
+        '400':
+          description: 'Request failed due to input validation error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '403':
+          description: 'Not authorised.'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '500':
+          description: 'Error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '405':
+          description: 'Method Not Supported'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+  /buyer-payment-history/{org_id}/external-info/privileges/details:
+    x-summary: Get (Privileges Details)
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - External Information - Unpaid debts
+      description: 'This operation returns details of buyer privileges, where buyer country is France or any of the French territories'
+      summary: Get Buyer Privileges Details
+      operationId: GetBuyerPrivilegesDetails
+      deprecated: false
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/OrganisationIdPath'
+        # Header
+        - $ref: '#/parameters/AtradiusOriginUserIdHeader'
+        - $ref: '#/parameters/AtradiusOriginApplicationHeader'
+        - $ref: '#/parameters/AtradiusOriginServiceHeader'
+        - $ref: '#/parameters/AtradiusInvocationServiceHeader'
+        - $ref: '#/parameters/AtradiusMessageTimestampHeader'
+        - $ref: '#/parameters/AtradiusMessageIdHeader'
+        - $ref: '#/parameters/AtradiusCorrelationIdHeader'
+        - $ref: '#/parameters/AtradiusConcurrencyControlVersionHeader'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BuyerPrivilegesDetailsPaginated'
+          examples:
+            application/json:
+              response:
+                - description: 'TRESOR'
+                  amount: 18000
+                  date_inscription: '2021-05-12'
+                - description: 'TRESOR'
+                  amount: 7000
+                  date_inscription: '2021-04-12'
+                - description: 'USSAF'
+                  amount: 11000
+                  date_inscription: '2020-03-12'
+                - description: 'TRESOR'
+                  amount: 5000
+                  date_inscription: '2019-05-12'
+                - description: 'USSAF'
+                  amount: 12000
+                  date_inscription: '2019-05-12'
+                - description: 'TRESOR'
+                  amount: 18000
+                  date_inscription: '2021-05-12'
+                - description: 'TRESOR'
+                  amount: 18000
+                  date_inscription: '2021-05-12'
+              total_results: 72,
+              count: 50,
+              has_more: true,
+              limit: 50,
+              offset: 0
+          headers: {}
+        '400':
+          description: 'Request failed due to input validation error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '403':
+          description: 'Not authorised.'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '500':
+          description: 'Error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '405':
+          description: 'Method Not Supported'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+  /buyer-payment-history/{org_id}/external-info/sna/status/{sna_status}:
+    x-summary: Get (SNA Match - Accepted/Pending)
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - External Information - SNA
+      description: 'This operation returns accepted / pending sna matches for buyer, where buyer country is Spain'
+      summary: Get Buyer's Accepted/ Pending SNA matches
+      operationId: GetBuyerSnaMatches
+      deprecated: false
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/OrganisationIdPath'
+        - $ref: '#/parameters/SnaStatusPath'
+        # Header
+        - $ref: '#/parameters/AtradiusOriginUserIdHeader'
+        - $ref: '#/parameters/AtradiusOriginApplicationHeader'
+        - $ref: '#/parameters/AtradiusOriginServiceHeader'
+        - $ref: '#/parameters/AtradiusInvocationServiceHeader'
+        - $ref: '#/parameters/AtradiusMessageTimestampHeader'
+        - $ref: '#/parameters/AtradiusMessageIdHeader'
+        - $ref: '#/parameters/AtradiusCorrelationIdHeader'
+        - $ref: '#/parameters/AtradiusConcurrencyControlVersionHeader'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BuyerSnaMatchesPaginated'
+          examples:
+            application/json:
+              response:
+                - sna_id: 12345600
+                  sna_alert_date: '2021-06-12'
+                  sna_org:
+                    org_id: 765843
+                    org_name: 'BuyerK'
+                    org_phone_number: 633546464
+                    org_buyer_registration_number: 276878263
+                    org_address: 'Málaga, 29580CA, Street 1'
+                    org_current_administrators: [
+                        'George Smith',
+                        'Max Smith',
+                        'George Cal'
+                    ]
+                  coincidence_type: 'Company name'
+                  coincidence_value: 1
+                  sna_match_org:
+                    org_id: 874635
+                    org_name: 'BuyerK'
+                    org_phone_number: 677832546
+                    org_buyer_registration_number: 276653435
+                    org_address: 'Málaga, 29001MA, Street 2'
+                    org_current_administrators: [
+                        'Adam Smith',
+                        'Peter Jackson',
+                    ]
+                  origin_target: 'Origin'
+                - sna_id: 12345601
+                  sna_alert_date: '2021-06-12'
+                  sna_org:
+                    org_id: 565743
+                    org_name: 'BuyerL'
+                    org_phone_number: 645543464
+                    org_buyer_registration_number: 256878213
+                    org_address: 'Málaga, 29005MA, Street 3'
+                    org_current_administrators: [
+                        'John Smith',
+                        'Michael Scofield',
+                        'Liam Neeson'
+                    ]
+                  coincidence_type: 'Address'
+                  coincidence_value: 1
+                  sna_match_org:
+                    org_id: 890635
+                    org_name: 'BuyerD'
+                    org_phone_number: 698823546
+                    org_buyer_registration_number: 276615435
+                    org_address: 'Málaga, 29005MA, Street 3'
+                    org_current_administrators: [
+                        'Adam Smith',
+                        'Peter Jackson',
+                    ]
+                  origin_target: 'Origin'
+                - sna_id: 12345602
+                  sna_alert_date: '2021-06-12'
+                  sna_org:
+                    org_id: 455743
+                    org_name: 'BuyerM'
+                    org_phone_number: 668123464
+                    org_buyer_registration_number: 256491413
+                    org_address: 'Madrid, 26782MX, Street 15'
+                    org_current_administrators: [
+                        'George Smith',
+                        'Max Smith'
+                    ]
+                  coincidence_type: 'Phone number'
+                  coincidence_value: 1
+                  sna_match_org:
+                    org_id: 895895
+                    org_name: 'BuyerE'
+                    org_phone_number: 668123464
+                    org_buyer_registration_number: 276260235
+                    org_address: 'Málaga, 29011MA, Street 8'
+                    org_current_administrators: [
+                        'John Smith',
+                        'Michael Scofield',
+                        'Liam Neeson'
+                    ]
+                  origin_target: 'Origin'
+                - sna_id: 12345603
+                  sna_alert_date: '2021-06-12'
+                  sna_org:
+                    org_id: 434143
+                    org_name: 'BuyerN'
+                    org_phone_number: 668123464
+                    org_buyer_registration_number: 256491413
+                    org_address: 'Madrid, 26782MX, Street 15'
+                    org_current_administrators: [
+                        'George Smith',
+                        'Max Smith',
+                        'Liam Neeson'
+                    ]
+                  coincidence_type: 'Current Administrators'
+                  coincidence_value: 1
+                  sna_match_org:
+                    org_id: 895671
+                    org_name: 'BuyerF'
+                    org_phone_number: 668121364
+                    org_buyer_registration_number: 276260235
+                    org_address: 'Málaga, 29011MA, Street 8'
+                    org_current_administrators: [
+                        'George Smith',
+                        'Max Smith',
+                        'Liam Neeson'
+                    ]
+                  origin_target: 'Origin'
+                - sna_id: 12345604
+                  sna_alert_date: '2021-06-12'
+                  sna_org:
+                    org_id: 745643
+                    org_name: 'BuyerO'
+                    org_phone_number: 612341816
+                    org_buyer_registration_number: 256491413
+                    org_address: 'Barcelona, 26782MX, Street 12'
+                    org_current_administrators: [
+                        'George Smith',
+                        'Max Smith',
+                        'Liam Neeson'
+                    ]
+                  coincidence_type: 'Buyer registration number'
+                  coincidence_value: 1
+                  sna_match_org:
+                    org_id: 895525
+                    org_name: 'BuyerG'
+                    org_phone_number: 612343464
+                    org_buyer_registration_number: 256491413
+                    org_address: 'Málaga, 29111MA, Street 6'
+                    org_current_administrators: [
+                        'John Smith',
+                        'Michael Scofield',
+                    ]
+                  origin_target: 'Origin'
+              total_results: 72
+              count: 50
+              has_more: true
+              limit: 50
+              offset: 0
+          headers: {}
+        '400':
+          description: 'Request failed due to input validation error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '403':
+          description: 'Not authorised.'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '500':
+          description: 'Error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '405':
+          description: 'Method Not Supported'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+  /buyer-payment-history/{org_id}/external-info/sna/{sna_id}:
+    x-summary: Get / Update (SNA Match)
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - External Information - SNA
+      description: 'This operation returns SNA match for buyer'
+      summary: Get Buyer SNA match
+      operationId: GetBuyerSnaMatch
+      deprecated: false
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/OrganisationIdPath'
+        - $ref: '#/parameters/SnaIdPath'
+        # Header
+        - $ref: '#/parameters/AtradiusOriginUserIdHeader'
+        - $ref: '#/parameters/AtradiusOriginApplicationHeader'
+        - $ref: '#/parameters/AtradiusOriginServiceHeader'
+        - $ref: '#/parameters/AtradiusInvocationServiceHeader'
+        - $ref: '#/parameters/AtradiusMessageTimestampHeader'
+        - $ref: '#/parameters/AtradiusMessageIdHeader'
+        - $ref: '#/parameters/AtradiusCorrelationIdHeader'
+        - $ref: '#/parameters/AtradiusConcurrencyControlVersionHeader'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/BuyerSnaMatch'
+          examples:
+            application/json:
+              sna_id: 12345602
+              sna_alert_date: '2021-06-12'
+              sna_org:
+                org_id: 455743
+                org_name: 'BuyerM'
+                org_phone_number: 668123464
+                org_buyer_registration_number: 256491413
+                org_address: 'Madrid, 26782MX, Street 15'
+                org_current_administrators: [
+                    'George Smith',
+                    'Max Smith'
+                ]
+              coincidence_type: 'Phone number'
+              coincidence_value: 1
+              sna_match_org:
+                org_id: 895895
+                org_name: 'BuyerE'
+                org_phone_number: 668123464
+                org_buyer_registration_number: 276260235
+                org_address: 'Málaga, 29011MA, Street 8'
+                org_current_administrators: [
+                    'John Smith',
+                    'Michael Scofield',
+                    'Liam Neeson'
+                ]
+              origin_target: 'Origin'
+          headers: {}
+        '400':
+          description: 'Request failed due to input validation error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '403':
+          description: 'Not authorised.'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '500':
+          description: 'Error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '405':
+          description: 'Method Not Supported'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+    patch:
+      security:
+        - Bearer: []
+      tags:
+        - External Information - SNA
+      description: 'This operation updates SNA match status, where buyer country is Spain'
+      summary: Update Buyer SNA match status
+      operationId: UpdateBuyerSnaMatchStatus
+      deprecated: false
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/OrganisationIdPath'
+        - $ref: '#/parameters/SnaIdPath'
+        - $ref: '#/parameters/SnaStatusBody'
+        # Header
+        - $ref: '#/parameters/AtradiusOriginUserIdHeader'
+        - $ref: '#/parameters/AtradiusOriginApplicationHeader'
+        - $ref: '#/parameters/AtradiusOriginServiceHeader'
+        - $ref: '#/parameters/AtradiusInvocationServiceHeader'
+        - $ref: '#/parameters/AtradiusMessageTimestampHeader'
+        - $ref: '#/parameters/AtradiusMessageIdHeader'
+        - $ref: '#/parameters/AtradiusCorrelationIdHeader'
+        - $ref: '#/parameters/AtradiusConcurrencyControlVersionHeader'
+      responses:
+        '204':
+          description: ''
+          headers: {}
+        '400':
+          description: 'Request failed due to input validation error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '403':
+          description: 'Not authorised.'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '500':
+          description: 'Error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '405':
+          description: 'Method Not Supported'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+  /buyer-payment-history/{org_id}/cases/{case_id}:
+    x-summary: Get / Update (Case Details)
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - Cases
+      description: This operation returns the case details
+      summary: Get Case Details
+      operationId: GetCaseDetails
+      deprecated: false
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/OrganisationIdPath'
+        - name: case_id
+          description: Case identifier
+          in: path
+          required: true
+          type: number
+          format: int32
+        - name: currency_code
+          in: query
+          required: true
+          type: string
+          description: The currency in which all amounts will be returned
+          maxLength: 3
+        # Param
+        - $ref: '#/parameters/LanguageParam'
+        # Header
+        - $ref: '#/parameters/AtradiusOriginUserIdHeader'
+        - $ref: '#/parameters/AtradiusOriginApplicationHeader'
+        - $ref: '#/parameters/AtradiusOriginServiceHeader'
+        - $ref: '#/parameters/AtradiusInvocationServiceHeader'
+        - $ref: '#/parameters/AtradiusMessageTimestampHeader'
+        - $ref: '#/parameters/AtradiusMessageIdHeader'
+        - $ref: '#/parameters/AtradiusCorrelationIdHeader'
+        - $ref: '#/parameters/AtradiusConcurrencyControlVersionHeader'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/CaseDetails'
+          headers: {}
+        '400':
+          description: 'Request failed due to input validation error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '403':
+          description: 'Not authorised.'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '500':
+          description: 'Error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+        '404':
+          description: 'organisation or case does not exist'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+        '405':
+          description: 'Method Not Supported'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+    patch:
+      security:
+        - Bearer: []
+      tags:
+        - Cases
+      description: This operation updates potential dispute flag
+      summary: Update Potential Dispute
+      operationId: UpdatePotentialDispute
+      deprecated: false
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/OrganisationIdPath'
+        - name: case_id
+          description: Case identifier
+          in: path
+          required: true
+          type: number
+          format: int32
+        - name: body
+          in: body
+          required: true
+          description: Potential dispute
+          schema:
+            $ref: '#/definitions/PotentialDispute'
+        # Param
+        - $ref: '#/parameters/LanguageParam'
+        # Header
+        - $ref: '#/parameters/AtradiusOriginUserIdHeader'
+        - $ref: '#/parameters/AtradiusOriginApplicationHeader'
+        - $ref: '#/parameters/AtradiusOriginServiceHeader'
+        - $ref: '#/parameters/AtradiusInvocationServiceHeader'
+        - $ref: '#/parameters/AtradiusMessageTimestampHeader'
+        - $ref: '#/parameters/AtradiusMessageIdHeader'
+        - $ref: '#/parameters/AtradiusCorrelationIdHeader'
+        - $ref: '#/parameters/AtradiusConcurrencyControlVersionHeader'
+      responses:
+        '204':
+          description: ''
+          headers: {}
+        '400':
+          description: 'Request failed due to input validation error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '403':
+          description: 'Not authorised.'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '500':
+          description: 'Error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '404':
+          description: 'organisation or case does not exist'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '405':
+          description: 'Method Not Supported'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+
+  /buyer-payment-history/{org_id}/cases/{case_id}/liabilities:
+    x-summary: Get (Case Liability Details)
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - Cases
+      description: This operation returns the case liability details
+      summary: Get Case Liability Details
+      operationId: GetCaseLiabilityDetails
+      deprecated: false
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/OrganisationIdPath'
+        - name: case_id
+          description: Case identifier
+          in: path
+          required: true
+          type: number
+          format: int32
+        - name: currency_code
+          in: query
+          required: true
+          type: string
+          description: The currency in which all amounts will be returned
+          maxLength: 3
+        # Param
+        - $ref: '#/parameters/LanguageParam'
+        # Header
+        - $ref: '#/parameters/AtradiusOriginUserIdHeader'
+        - $ref: '#/parameters/AtradiusOriginApplicationHeader'
+        - $ref: '#/parameters/AtradiusOriginServiceHeader'
+        - $ref: '#/parameters/AtradiusInvocationServiceHeader'
+        - $ref: '#/parameters/AtradiusMessageTimestampHeader'
+        - $ref: '#/parameters/AtradiusMessageIdHeader'
+        - $ref: '#/parameters/AtradiusCorrelationIdHeader'
+        - $ref: '#/parameters/AtradiusConcurrencyControlVersionHeader'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/CaseLiability'
+          headers: {}
+        '400':
+          description: 'Request failed due to input validation error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '403':
+          description: 'Not authorised.'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '500':
+          description: 'Error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '404':
+          description: 'Case Liability not found'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '405':
+          description: 'Method Not Supported'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+  /buyer-payment-history/{org_id}/cases/{case_id}/financial-transactions/total-amounts:
+    x-summary: Get (Financial Transactions Total Amounts)
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - Cases
+      description: This operation returns the total of case financial transactions
+      summary: Get Case Financial Transactions Total Amounts
+      operationId: GetCaseFinancialTransactionsTotalAmounts
+      deprecated: false
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/OrganisationIdPath'
+        - name: case_id
+          description: Case identifier
+          in: path
+          required: true
+          type: number
+          format: int32
+        - name: currency_code
+          in: query
+          required: true
+          type: string
+          description: The currency in which all amounts will be returned
+          maxLength: 3
+        # Param
+        - $ref: '#/parameters/LanguageParam'
+        - $ref: '#/parameters/PointInTimeParam'
+        # Header
+        - $ref: '#/parameters/AtradiusOriginUserIdHeader'
+        - $ref: '#/parameters/AtradiusOriginApplicationHeader'
+        - $ref: '#/parameters/AtradiusOriginServiceHeader'
+        - $ref: '#/parameters/AtradiusInvocationServiceHeader'
+        - $ref: '#/parameters/AtradiusMessageTimestampHeader'
+        - $ref: '#/parameters/AtradiusMessageIdHeader'
+        - $ref: '#/parameters/AtradiusCorrelationIdHeader'
+        - $ref: '#/parameters/AtradiusConcurrencyControlVersionHeader'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/CaseFinancialTransactionsTotal'
+          headers: {}
+        '400':
+          description: 'Request failed due to input validation error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '403':
+          description: 'Not authorised.'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '500':
+          description: 'Error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '404':
+          description: 'Case Financial Transaction not found'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '405':
+          description: 'Method Not Supported'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+
+  /buyer-payment-history/{org_id}/cases/{case_id}/financial-transactions/details:
+    x-summary: Get (Case Financial Transactions Details)
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - Cases
+      description: This operation returns the case financial transactions
+      summary: Get Case Financial Transactions Details
+      operationId: GetCaseFinancialTransactions Details
+      deprecated: false
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/OrganisationIdPath'
+        - name: case_id
+          description: Case identifier
+          in: path
+          required: true
+          type: number
+          format: int32
+        - name: currency_code
+          in: query
+          required: true
+          type: string
+          description: The currency in which all amounts will be returned
+          maxLength: 3
+        - name: sort
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
+            enum: ['date_first+','date_first-']
+          description: 'Array of fields to sort on.'
+          default: [date_first-]
+        # Param
+        - $ref: '#/parameters/LanguageParam'
+        - $ref: '#/parameters/PointInTimeParam'
+        # Header
+        - $ref: '#/parameters/AtradiusOriginUserIdHeader'
+        - $ref: '#/parameters/AtradiusOriginApplicationHeader'
+        - $ref: '#/parameters/AtradiusOriginServiceHeader'
+        - $ref: '#/parameters/AtradiusInvocationServiceHeader'
+        - $ref: '#/parameters/AtradiusMessageTimestampHeader'
+        - $ref: '#/parameters/AtradiusMessageIdHeader'
+        - $ref: '#/parameters/AtradiusCorrelationIdHeader'
+        - $ref: '#/parameters/AtradiusConcurrencyControlVersionHeader'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/CaseFinancialTransactionsPaginated'
+          headers: {}
+          examples:
+            application/json:
+              response:
+                - posting_type: Posting type
+                  date_first: '2021-12-16'
+                  date_last: '2021-12-16'
+                  due_date: '2021-12-16'
+                  ext_due_date: '2021-12-16'
+                  vat: Posting type
+                  posting_amount: 200.5
+                  net_posting_amount: 200.5
+                  posting_vat_amount: 200.5
+                - posting_type: Posting type
+                  date_first: '2021-11-17'
+                  date_last: '2021-11-17'
+                  due_date: '2021-11-17'
+                  ext_due_date: '2021-11-17'
+                  vat: Posting type
+                  posting_amount: 3000.8
+                  net_posting_amount: 3000.8
+                  posting_vat_amount: 3000.8
+                - posting_type: Posting type
+                  date_first: '2021-12-16'
+                  date_last: '2021-12-16'
+                  due_date: '2021-12-16'
+                  ext_due_date: '2021-12-16'
+                  vat: Posting type
+                  posting_amount: 1000.99
+                  net_posting_amount: 1000.99
+                  posting_vat_amount: 1000.99
+                - posting_type: Posting type
+                  date_first: '2021-12-15'
+                  date_last: '2021-12-15'
+                  due_date: '2021-12-15'
+                  ext_due_date: '2021-12-15'
+                  vat: Posting type
+                  posting_amount: 3000.8
+                  net_posting_amount: 3000.8
+                  posting_vat_amount: 3000.8
+                - posting_type: Posting type
+                  date_first: '2021-11-17'
+                  date_last: '2021-11-17'
+                  due_date: '2021-11-17'
+                  ext_due_date: '2021-11-17'
+                  vat: Posting type
+                  posting_amount: 200.95
+                  net_posting_amount: 200.95
+                  posting_vat_amount: 200.95
+                - posting_type: Posting type
+                  date_first: '2021-12-15'
+                  date_last: '2021-12-15'
+                  due_date: '2021-12-15'
+                  ext_due_date: '2021-12-15'
+                  vat: Posting type
+                  posting_amount: 1000.99
+                  net_posting_amount: 1000.99
+                  posting_vat_amount: 1000.99
+                - posting_type: Posting type
+                  date_first: '2021-11-17'
+                  date_last: '2021-11-17'
+                  due_date: '2021-11-17'
+                  ext_due_date: '2021-11-17'
+                  vat: Posting type
+                  posting_amount: 200.95
+                  net_posting_amount: 200.95
+                  posting_vat_amount: 200.95
+              total_results: 72
+              count: 50
+              has_more: true
+              limit: 50
+              offset: -100000000
+        '400':
+          description: 'Request failed due to input validation error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '403':
+          description: 'Not authorised.'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '404':
+          description: 'Case Financial Transaction found'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '500':
+          description: 'Error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '405':
+          description: 'Method Not Supported'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+
+  /buyer-payment-history/{org_id}/cases/{case_id}/history:
+    x-summary: Get (Case History)
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - Cases
+      description: This operation returns the case history
+      summary: Get Case History
+      operationId: GetCaseHistory
+      deprecated: false
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/OrganisationIdPath'
+        - name: case_id
+          description: Case identifier
+          in: path
+          required: true
+          type: number
+          format: int32
+        - in: query
+          name: actions
+          required: true
+          type: string
+          description: All messages, incl. system generated message / only manually entered message
+          enum: [all,manual]
+        - name: sort
+          in: query
+          required: false
+          type: array
+          items:
+            type: string
+            enum: ['date+','date-']
+          description: 'Array of fields to sort on.'
+          default: [date-]
+        # Param
+        - $ref: '#/parameters/LanguageParam'
+        # Header
+        - $ref: '#/parameters/AtradiusOriginUserIdHeader'
+        - $ref: '#/parameters/AtradiusOriginApplicationHeader'
+        - $ref: '#/parameters/AtradiusOriginServiceHeader'
+        - $ref: '#/parameters/AtradiusInvocationServiceHeader'
+        - $ref: '#/parameters/AtradiusMessageTimestampHeader'
+        - $ref: '#/parameters/AtradiusMessageIdHeader'
+        - $ref: '#/parameters/AtradiusCorrelationIdHeader'
+        - $ref: '#/parameters/AtradiusConcurrencyControlVersionHeader'
+      responses:
+        '200':
+          description: ''
+          schema:
+            $ref: '#/definitions/CaseHistoryPaginated'
+          examples:
+            application/json:
+              response:
+                - description: Case History1
+                  date: '2021-12-15'
+                  user_id: nljjns1
+                  notes: History notes 1
+                - description: Case History2
+                  date: '2022-01-01'
+                  user_id: nljjns1
+                  notes: History notes 2
+                - description: Case History3
+                  date: '2022-01-03'
+                  user_id: nljjns1
+                  notes: History notes 3
+                - description: Case History4
+                  date: '2022-01-04'
+                  user_id: nljjns1
+                  notes: |-
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                     Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?
+                - description: Case History5
+                  date: '2022-01-05'
+                  user_id: nljjns1
+                  notes: History notes 5
+                - description: Case History6
+                  date: '2022-01-06'
+                  user_id: nljjns1
+                  notes: History notes 6
+                - description: Case History7
+                  date: '2022-01-07'
+                  user_id: nljjns1
+                  notes: History notes 7
+                - description: Case History8
+                  date: '2022-01-08'
+                  user_id: nljjns1
+                  notes: History notes 8
+                - description: Case History9
+                  date: '2022-01-09'
+                  user_id: nljjns1
+                  notes: History notes 9
+              total_results: 9
+              count: 5
+              has_more: true
+              limit: 5
+              offset: 0
+          headers: {}
+        '400':
+          description: 'Request failed due to input validation error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '403':
+          description: 'Not authorised.'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '500':
+          description: 'Error'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+        '404':
+          description: 'Case History not found'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+        '405':
+          description: 'Method Not Supported'
+          schema:
+            $ref: '#/definitions/ErrorObject'
+          headers: {}
+definitions:
+  # Error Object Definition
+  ErrorObject:
+    title: ErrorObject
+    type: object
+    properties:
+      severity:
+        description: 'This is used to define how severe the error is and how big impact it has.'
+        type: string
+        enum: ['CRITICAL', 'ERROR', 'WARNING', 'INFO']
+        example: 'ERROR'
+      type:
+        description: 'Type of Exception or error or warning. Can be generic exceptions or even custom defined exceptions specific to the API'
+        type: string
+        example: 'NullPointerException'
+      code:
+        description: Specific error/warning code for a particular error, very specific to the API/application. The old faultcode.
+        type: string
+        example: 'GE_XP_0003'
+      message:
+        description: 'A descriptive error message for the consumer. The old faultstring.'
+        type: string
+        example: 'The operation over the buyer 1234 failed due to an internal error'
+      source:
+        description: 'The name of origin (parent) service which is invoked.'
+        type: string
+        example: 'BuyerBAS.UpdateBuyerManualUnderwritingSettings'
+      target:
+        description: 'Key/value pair indicating which input property could have caused the error.'
+        type: array
+        items:
+          $ref: '#/definitions/ErrorObjectPairValueKey'
+      inner_errors:
+        description: 'An array of internal errors which might provide the stack trace of all the internal errors codes being returned by all the inner systems, hence leading to this parent error..'
+        type: array
+        items:
+          $ref: '#/definitions/InnerErrorObject'
+    required:
+      - severity
+      - type
+      - code
+      - message
+  ErrorObjectPairValueKey:
+    title: ErrorObjectPairValueKey
+    type: object
+    properties:
+      key:
+        description: 'Key / identifier'
+        type: string
+        example: 'buyer_id'
+      value:
+        description: 'Value'
+        type: string
+        example: '1234'
+  InnerErrorObject:
+    title: InnerErrorObject
+    type: object
+    properties:
+      severity:
+        description: 'This is used to define how severe the error is and how big impact it has.'
+        type: string
+        enum: ['CRITICAL', 'ERROR', 'WARNING', 'INFO']
+        example: 'ERROR'
+      code:
+        description: 'Specific error/warning code for a particular error, very specific to the API/application. The old faultcode'
+        type: string
+        example: 'GE_XP_0003'
+      message:
+        description: 'A descriptive error message for the consumer. The old faultstring.'
+        type: string
+        example: 'The operation over the buyer 1234 failed due to an internal error'
+      source:
+        description: 'The name of origin (parent) service which is invoked.'
+        type: string
+        example: 'BuyerBAS.UpdateBuyerManualUnderwritingSettings'
+      target:
+        description: 'Key/value pair indicating which input property could have caused the error.'
+        type: array
+        items:
+          $ref: '#/definitions/ErrorObjectPairValueKey'
+  # Audit fields controlled internally
+  AuditFields:
+    title: AuditFields
+    type: object
+    properties:
+      create_date:
+        description: 'Creation date. ISO8601 format [YYYY-MM-DDTHH:mi:ssZ]'
+        type: string
+        format: date-time
+        example: '2021-01-02T22:22:22Z'
+        readOnly: true
+      create_uid:
+        description: 'User who created the record'
+        type: string
+        example: 'nldmer1'
+        readOnly: true
+      last_update_date:
+        description: 'Date when the record was updated. ISO8601 format [YYYY-MM-DDTHH:mi:ssZ]'
+        type: string
+        format: date-time
+        example: '2021-01-02T22:22:22Z'
+        readOnly: true
+      last_update_uid:
+        description: 'User who updated the record'
+        type: string
+        example: 'nldmer1'
+        readOnly: true
+      effect_from_date:
+        description: 'Date when the record started being effective'
+        type: string
+        format: date-time
+        example: '2021-01-02T22:22:22Z'
+        readOnly: true
+      effect_to_date:
+        description: 'Date when the record stopped being effective'
+        type: string
+        format: date-time
+        example: '2221-01-02T22:22:22Z'
+        readOnly: true
+  Pagination:
+    title: Pagination
+    description: Used for the paginated operations
+    type: object
+    properties:
+      total_results:
+        type: integer
+        format: int32
+        example: 72
+      count:
+        type: integer
+        example: 50
+        format: int32
+      has_more:
+        type: boolean
+        example: true
+      limit:
+        type: integer
+        format: int32
+        example: 50
+      offset:
+        type: integer
+        format: int32
+        example: 0
+
+  NegativeInformationSummary:
+    title: NegativeInformationSummary
+    type: object
+    properties:
+      aggregate:
+        readOnly: true
+        allOf:
+          - $ref: '#/definitions/Aggregate'
+      cyc_claims:
+        readOnly: true
+        allOf:
+          - $ref: '#/definitions/CyCClaims'
+      atradius_claims:
+        readOnly: true
+        allOf:
+          - $ref: '#/definitions/AtradiusClaims'
+      new_claims:
+        readOnly: true
+        allOf:
+          - $ref: '#/definitions/NewClaims'
+      unpaid_debts:
+        readOnly: true
+        allOf:
+          - $ref: '#/definitions/UnpaidDebts'
+      ssx_rating:
+        readOnly: true
+        allOf:
+          - $ref: '#/definitions/SSXRating'
+      social_security_debts:
+        readOnly: true
+        allOf:
+          - $ref: '#/definitions/SocialSecurityDebts'
+      sna_alerts:
+        readOnly: true
+        allOf:
+          - $ref: '#/definitions/SNAAlerts'
+      supression_date:
+        readOnly: true
+        allOf:
+          -  $ref: '#/definitions/SuppressionDate'
+  Aggregate:
+    title: Aggregate
+    type: object
+    properties:
+      claims_paid:
+        $ref: '#/definitions/ClaimsPaid'
+  ClaimsPaid:
+    title: ClaimsPaid
+    type: object
+    properties:
+      count:
+        type: integer
+        format: int32
+        description: Number of Clear cases recorded in the last 5 years + number of Cyclope claims recorded in the last 5 years
+        example: 2
+        readOnly: true
+      amount:
+        type: number
+        format: double
+        description : Aggregated amount of Clear cases recorded in the last 5 years + aggregated amount of Cyclope claims recorded in the last 5 years
+        example: 1000.99
+        readOnly: true
+  ClaimsSubmitted:
+    title: ClaimsSubmitted
+    type: object
+    properties:
+      count:
+        type: integer
+        format: int32
+        description: Aggregated count of Clear cases recorded in the last 12 months in Atradius/CYC
+        example: 1
+        readOnly: true
+      amount:
+        type: number
+        format: double
+        description: Aggregated amount of Clear cases recorded in the last 12 months in Atraidius/CYC
+        example: 10000.88
+        readOnly: true
+  Extensions:
+    title: Extensions
+    type: object
+    properties:
+      count:
+        type: integer
+        format: int32
+        description: Number of extensions of payment recorded in the last 12 months
+        example: 1
+        readOnly: true
+      amount:
+        type: number
+        format: double
+        example: 50000.23
+        description: Aggregated amount of extensions of payment recorded in the last 12 months
+        readOnly: true
+  disputeCases:
+    title: disputeCases
+    type: object
+    properties:
+      count:
+        type: integer
+        format: int32
+        description: Number of Atradius/Cyclope claims recorded in the last 12 months
+        example: 3
+        readOnly: true
+      amount:
+        type: number
+        format: double
+        description: Aggregated amount of Atradius/Cyclope claims recorded in the last 12 months
+        example: 35000
+        readOnly: true
+  NonPaymentNotice:
+    title: NonPaymentNotice
+    type: object
+    properties:
+      count:
+        type: integer
+        format: int32
+        description: Number of non-payment notices with status "01 Effective", "02 Rejected" and "06 Pending manual" recorded in the last 12 months.
+        example: 2
+        readOnly: true
+      amount:
+        type: number
+        format: double
+        description: Aggregated amount of non-payment notices with status "01 Effective", "02 Rejected" and "06 Pending manual" recorded in the last 12 months.
+        example: 3445.33
+        readOnly: true
+  CyCClaims:
+    title: CyCClaims
+    type: object
+    properties:
+      claims_submitted:
+        $ref: '#/definitions/ClaimsSubmitted'
+      extensions:
+        $ref: '#/definitions/Extensions'
+      dispute_cases:
+        $ref: '#/definitions/disputeCases'
+      non_payment_notice:
+        $ref: '#/definitions/NonPaymentNotice'
+  AtradiusClaims:
+    title: AtradiusClaims
+    type: object
+    properties:
+      claims_submitted:
+        $ref: '#/definitions/ClaimsSubmitted'
+      extensions:
+        $ref: '#/definitions/Extensions'
+      dispute_cases:
+        $ref: '#/definitions/disputeCases'
+      non_payment_notice:
+        $ref: '#/definitions/NonPaymentNotice'
+  NewClaims:
+    title: NewClaims
+    type: object
+    properties:
+      new:
+        type: boolean
+        description:  Will be switched on automatically when new claims arrive the system or existing claim cases change to a defined status as long as there's no suppression date or suppression date is older than the receipt date of the new claims case
+        example: true
+        readOnly: true
+      visibility:
+        $ref: '#/definitions/Visibility'
+  UnpaidDebts:
+    title: UnpaidDebts
+    type: object
+    properties:
+      visibility:
+        $ref: '#/definitions/Visibility'
+      new:
+        description: Will be switched on if a new debt is registered. As a result, AutomUW will stop working until the underwriter introduces a suppression date.
+        example: true
+        type: boolean
+        readOnly: true
+  SSXRating:
+    title: SSXRating
+    type: object
+    properties:
+      visibility:
+        $ref: '#/definitions/Visibility'
+      new:
+        description: Will be switched on if a new debt is registered. As a result, AutomUW will stop working until the underwriter introduces a suppression date.
+        type: boolean
+        example: true
+        readOnly: true
+      rating:
+        type: number
+        format: integer
+        example: 5
+        readOnly: true
+  SocialSecurityDebts:
+    title: SocialSecurityDebts
+    type: object
+    properties:
+      visibility:
+        $ref: '#/definitions/Visibility'
+      new:
+        description: Will be switched on if a new social security debt is registered. As a result, AutomUW will stop working until the underwriter introduces a suppression date.
+        example: true
+        type: boolean
+        readOnly: true
+  SNAAlerts:
+    title: SNAAlerts
+    type: object
+    properties:
+      visibility:
+        $ref: '#/definitions/Visibility'
+      sna_alert_flag:
+        description: Will be switched on if there's an alert on the social network analysis of the buyer and if it is has T-code 74 [withdrawn due to SNA]
+        example: true
+        type: boolean
+      sna_notes:
+        description: If the the SNA alert flag is `true`, there will be a note containing the Buyer number, name
+        type: array
+        items:
+          $ref: '#/definitions/SNANote'
+  SNANote:
+    title: SNAnote
+    type: object
+    properties:
+      org_id:
+        description: Organisation number
+        example: 12345678
+        type: integer
+        format: int32
+        readOnly: true
+      short_name:
+        description: By default, first 20 characters of full name
+        example: KPN
+        type: string
+        maxLength: 20
+        readOnly: true
+  SuppressionDate:
+    title: SupressionDate
+    type: object
+    properties:
+      suppression_date:
+        description: The moment the user sets a suppression date, the New flag is switched off. UTC in ISO8601 format [YYYY-MM-DDThh:mm:ssZ]
+        example: '2021-03-21T00:00:00Z'
+        type: string
+        format: date-time
+      visibility:
+        $ref: '#/definitions/Visibility'
+    required:
+      - suppression_date
+  Visibility:
+    title: Visibility
+    description: Indicator for the visibility of the field
+    type: string
+    enum:
+      - view
+      - edit
+      - hidden
+    readOnly: true
+  BuyerSocialSecurityDebtsPaginated:
+    title:  BuyerSocialSecurityDebtsPaginated
+    description: List of social security debts of buyer
+    type: object
+    allOf:
+      - type: object
+        properties:
+          response:
+            type: array
+            items:
+              $ref: '#/definitions/BuyerSocialSecurityDebt'
+      - $ref: '#/definitions/Pagination'
+  BuyerSocialSecurityDebt:
+    title:  BuyerSocialSecurityDebt
+    description:  Social security debts of buyer
+    type: object
+    properties:
+      social_security_debt_id:
+        description: Social Security Debt identifier
+        type: integer
+        format: int64
+        readOnly: true
+        example: 267
+      reception_date:
+        description: Reception date of social security debt
+        type: string
+        format: date
+        example: '2021-05-15'
+      close_date:
+        description: Close date of social security debt
+        type: string
+        format: date
+        example: '2021-05-15'
+      trimester:
+        description: Shows the quarter of which the payment delay relates to (quarter [1,2,3 or 4] + year in 2 digits), so 2nd quarter 2021 would be 221
+        type: integer
+        format: int32
+        example: 197
+      amount_overdue:
+        description: Overdue amount
+        example: 12000
+        type: number
+        format: double
+      dispute:
+        description: flag for dispute
+        example: N
+        type: boolean
+      free_text:
+        description: Free text
+        example: Free text example
+        type: string
+    required:
+      - reception_date
+      - close_date
+      - trimester
+      - amount_overdue
+      - dispute
+  BuyerExternalUnpaidDebtsSummary:
+    title:  BuyerExternalUnpaidDebtsSummary
+    description:  Summary of unpaid debts of buyer
+    type: object
+    properties:
+      suppression_date:
+        example: '2021-05-01'
+        type: string
+        format: date
+        readOnly: true
+      ssx_rating:
+        example: 10
+        type: integer
+        format: int32
+        description: SSX calculated at the record date
+        readOnly: true
+      ssx_flag:
+        example: Y
+        type: boolean
+        description: SSX flg Y/M
+        readOnly: true
+      ip:
+        type: array
+        items:
+          $ref: '#/definitions/IpCcMonthly'
+      cc:
+        type: array
+        items:
+          $ref: '#/definitions/IpCcMonthly'
+      ssx_rating_monthly:
+        type: array
+        items:
+          $ref: '#/definitions/SsxRatingMonthly'
+  IpCcMonthly:
+    title: IpCcMonthly
+    type: object
+    properties:
+      duration:
+        example: May-21
+        type: string
+        readOnly: true
+      rating:
+        $ref: '#/definitions/CountAmount'
+  SsxRatingMonthly:
+    title:  SsxRatingMonthly
+    type: object
+    properties:
+      duration:
+        example: May-21
+        type: string
+        readOnly: true
+      rating:
+        example:  10
+        type: integer
+        format: int32
+        description: SSX rating value
+  CountAmount:
+    title: CountAmount
+    type: object
+    properties:
+      count:
+        type: integer
+        format: int32
+        description: Number of debts
+        example: 2
+        readOnly: true
+      amount:
+        type: number
+        format: double
+        description : Aggregated amount of debts
+        example: 1000.99
+        readOnly: true
+  BuyerExternalUnpaidDebtsDetailsPaginated:
+    title:  BuyerExternalUnpaidDebtsDetailsPaginated
+    description: List of details of unpaid debts of buyer
+    type: object
+    allOf:
+      - type: object
+        properties:
+          response:
+            type: array
+            items:
+              $ref: '#/definitions/BuyerExternalUnpaidDebtsDetails'
+      - $ref: '#/definitions/Pagination'
+  BuyerExternalUnpaidDebtsDetails:
+    title: BuyerExternalUnpaidDebtsDetails
+    description:  Details of unpaid debts of buyer
+    type: object
+    properties:
+      record_date:
+        description:  Date the debts were uploaded into the system
+        type: string
+        format: date
+        example: "2020-03-15"
+        readOnly: true
+      effect_from:
+        description:  Date when the date started being effective
+        type: string
+        format: date
+        example: "2020-03-15"
+        readOnly: true
+      effect_to:
+        description:  Date when the date stopped being effective
+        type: string
+        format: date
+        example: "2020-03-15"
+        readOnly: true
+      ssx_rating:
+        type: integer
+        format: int32
+        description: SSX calculated at the record date
+        readOnly: true
+      code:
+        type: string
+        description: Four possible values I, D, M, C
+        example: "I"
+        maxLength: 1
+        readOnly: true
+      ip_not_accept_code_0:
+        $ref: '#/definitions/CountAmount'
+      ip_accept_code_1:
+        $ref: '#/definitions/CountAmount'
+      ip_bao_code_2:
+        $ref: '#/definitions/CountAmount'
+      cc_not_accept_code_0:
+        $ref: '#/definitions/CountAmount'
+      cc_accept_code_1:
+        $ref: '#/definitions/CountAmount'
+      cc_bao_code_2:
+        $ref: '#/definitions/CountAmount'
+  BuyerPrivilegesSummary:
+    title:  BuyerPrivilegesSummary
+    description:  Summary of buyer privileges
+    type: object
+    properties:
+      publication_date:
+        example: "2021-05-12"
+        type: string
+        format: date
+        readOnly: true
+      end_of_monitoring:
+        example: "2021-05-12"
+        type: string
+        format: date
+        readOnly: true
+      latest_inscriptions_tresor:
+        $ref: '#/definitions/Inscriptions'
+      latest_inscriptions_urssaf:
+        $ref: '#/definitions/Inscriptions'
+      aggregated_inscriptions_tresor:
+        $ref: '#/definitions/AggregatedInscriptions'
+      aggregated_inscriptions_urssaf:
+        $ref: '#/definitions/AggregatedInscriptions'
+  Inscriptions:
+    title:  Inscriptions
+    description: Inscriptions
+    type: object
+    properties:
+      description:
+        example: 'TRESOR'
+        description: TRESOR- Tax unpaid, URSSAF - Social security charges
+        type: string
+        readOnly: true
+      amount:
+        type: number
+        format: double
+        example: 50000.23
+        description: Monetary Value
+        readOnly: true
+      date_inscription:
+        example: "2021-05-12"
+        type: string
+        format: date
+        readOnly: true
+  AggregatedInscriptions:
+    title:  AggregatedInscriptions
+    description:  Aggregated Inscriptions
+    type: object
+    properties:
+      description:
+        example: 'TRESOR'
+        description: TRESOR- Tax unpaid, URSSAF - Social security charges
+        type: string
+        readOnly: true
+      number:
+        type: integer
+        format: int32
+        description: The sum of TRESOR or URSSAF instances
+        example: 10
+        readOnly: true
+      amount:
+        type: number
+        format: double
+        example: 50000.23
+        description: The aggregated amount of the TRESOR or URSSAF instances
+        readOnly: true
+
+  BuyerPrivilegesDetailsPaginated:
+    title:  BuyerPrivilegesSummaryDetailsPaginated
+    description: List of details of buyer privileges
+    type: object
+    allOf:
+      - type: object
+        properties:
+          response:
+            type: array
+            items:
+              $ref: '#/definitions/Inscriptions'
+      - $ref: '#/definitions/Pagination'
+  BuyerSnaMatchesPaginated:
+    title:  BuyerSnaMatchesPaginated
+    description: List of sna matches for buyer
+    type: object
+    allOf:
+      - type: object
+        properties:
+          response:
+            type: array
+            items:
+              $ref: '#/definitions/BuyerSnaMatch'
+      - $ref: '#/definitions/Pagination'
+  BuyerSnaMatch:
+    title:  BuyerSnaMatch
+    description:  sna match for buyer
+    type: object
+    properties:
+      sna_id:
+        example: 123456789
+        type: integer
+        format: int64
+        description: 'SNA identifier'
+        readOnly: true
+      sna_alert_date:
+        example: "2021-05-12"
+        type: string
+        format: date
+        readOnly: true
+      sna_org:
+        $ref: '#/definitions/SNAOrganisation'
+      coincidence_type:
+        example: "Phone number"
+        type: string
+        readOnly: true
+      coincidence_value:
+        example: 3
+        type: string
+        readOnly: true
+      sna_match_org:
+        $ref: '#/definitions/SNAOrganisation'
+      origin_target:
+        description:  Either "Origin" or "Target". Origin is when the buyer is the party which initiated the SNA in the first place. Target is when the party has come up during the check.
+        example: Origin
+        type: string
+        readOnly: true
+  SNAOrganisation:
+    title:  SNAOrganisation
+    description:  sna organisation for buyer
+    type: object
+    properties:
+      org_id:
+        example: 123456
+        type: integer
+        format: int32
+        description: 'Organisation identifier'
+      org_name:
+        example: ID123456
+        type: string
+        readOnly: true
+      org_phone_number:
+        example: 1234567891
+        type: integer
+        format: int32
+        readOnly: true
+      org_buyer_registration_number:
+        example: 1234567891
+        type: string
+        readOnly: true
+      org_address:
+        example: ABC, abc abc
+        type: string
+        readOnly: true
+      org_current_administrators:
+        type: array
+        items:
+          type: string
+        example: ["George Smith", "Max Smith", "George Smith3"]
+        readOnly: true
+  SNAStatus:
+    title:  SNAStatus
+    description:  sna status for buyer
+    type: object
+    properties:
+      sna_status:
+        example: Accepted
+        type: string
+        enum: [Accepted, Rejected]
+        readOnly: false
+    required:
+      - sna_status
+  ExternalInfoTabs:
+    title:  ExternalInfoTabs
+    description:  External info tabs for buyer depending on country of buyer
+    type: object
+    properties:
+      social_security:
+        example: true
+        type: boolean
+        readOnly: true
+      unpaid_debts:
+        example: true
+        type: boolean
+        readOnly: true
+      sna:
+        example: true
+        type: boolean
+        readOnly: true
+  CaseDetails:
+    title:  Case Details
+    description:  Case details
+    type: object
+    properties:
+      case_type:
+        description: Case type
+        type: string
+        maxLength: 35
+        example:  Claim
+        readOnly: true
+      status:
+        description: Status
+        type: string
+        maxLength: 35
+        example:  Status
+        readOnly: true
+      status_desc:
+        description: Status Description
+        type: string
+        maxLength: 50
+        example:  Status Description
+        readOnly: true
+      status_date:
+        description:  Date of latest status update
+        type: string
+        format: date
+        example: "2021-12-15"
+        readOnly: true
+      total_outstanding_amount:
+        type: number
+        format: double
+        description : All posting combined
+        example: 1000.99
+        readOnly: true
+      date_received:
+        description:  Date received
+        type: string
+        format: date
+        example: "2021-12-15"
+        readOnly: true
+      customer_name:
+        description: Customer name
+        type: string
+        maxLength: 35
+        example:  Customer name
+        readOnly: true
+      policy_number:
+        type: number
+        description : Policy number
+        example: 12345
+        readOnly: true
+      policy_currency:
+        description: Currency the policy was signed in
+        type: string
+        maxLength: 3
+        example:  USD
+        readOnly: true
+      case_owner:
+        description: Case owner ID (coming from Clear or Cyclope)
+        type: string
+        maxLength: 35
+        example:  Case Owner ID
+        readOnly: true
+      case_owner_name:
+        description: Case owner ID (coming from Clear or Cyclope)
+        type: string
+        maxLength: 35
+        example:  Case Owner name
+        readOnly: true
+      local_debt_collector:
+        description: Organisation that has been assigned for collecting the debts
+        type: string
+        maxLength: 35
+        example:  Local debt collector
+        readOnly: true
+      potential_dispute_flag:
+        description: Potential dispute flag Y/N
+        example: Y
+        type: boolean
+        readOnly: false
+      potential_dispute_explanation:
+        description: Potential dispute explanation
+        type: string
+        maxLength: 35
+        example:  Potential dispute explanation
+        readOnly: false
+      last_update_user_uid:
+        description: Potential dispute last update user uid
+        type: string
+        maxLength: 10
+        example:  nljjns1
+        readOnly: false
+      last_update_user:
+        description: Potential dispute last update user
+        type: string
+        maxLength: 50
+        example:  John Jones
+        readOnly: true
+      update_date:
+        description:  Update date
+        type: string
+        format: date
+        example: "2021-12-15"
+        readOnly: false
+      potential_dispute_history:
+        description: Potential dispute history
+        type: array
+        items:
+          $ref: '#/definitions/PotentialDispute'
+      dispute_flag:
+        description: Dispute flag Y/N
+        example: Y
+        type: boolean
+        readOnly: true
+      reason_for_dispute:
+        description: Reason for dispute
+        type: string
+        maxLength: 100
+        example:  Reason for dispute
+        readOnly: true
+      preredit_risk:
+        description: Policy feature indicating risk before invoices are sent (Atradius only)
+        example: Y
+        type: boolean
+        readOnly: true
+      retention_of_title:
+        description: Feature indicating inventory retention (Atradius only)
+        example: Y
+        type: boolean
+        readOnly: true
+      payment_plan_in_place:
+        description: Buyer has a payment plan with customer or collector (Atradius only)
+        example: Y
+        type: boolean
+        readOnly: true
+      event_loss_date:
+        description:  Date of damage occurrence.
+        type: string
+        format: date
+        example: "2021-12-15"
+        readOnly: true
+      buyer_is_customer_flag:
+        description: Y if Buyer is customer
+        example: Y
+        type: boolean
+        readOnly: true
+      recovery_status:
+        description: CyC only, whether we're going to court or not
+        type: string
+        maxLength: 100
+        example:  Court
+        readOnly: true
+      due_date:
+        description:  Due date
+        type: string
+        format: date
+        example: "2021-12-15"
+        readOnly: true
+      buyer_name:
+        description:  Buyer name
+        type: string
+        maxLength: 100
+        example:  Buyer name
+        readOnly: true
+      t_code:
+        description:  Only applicable when case type is "Non-payment" or "Extension"
+        type: string
+        maxLength: 100
+        example:  T-code
+        readOnly: true
+      first_extension_flag:
+        description: Only applicable when case type is "Extension"
+        example: Y
+        type: boolean
+        readOnly: true
+      authorised_extension_flag:
+        description: Only applicable when case type is "Extension"
+        example: Y
+        type: boolean
+        readOnly: true
+      bill_of_exchange_flag:
+        description: Only applicable when case type is "Non-payment" or "Extension"
+        example: Y
+        type: boolean
+        readOnly: true
+      bill_of_exchange_new_duedate_flag:
+        description: Only applicable when case type is "Extension"
+        example: Y
+        type: boolean
+        readOnly: true
+      case_notes:
+        description: Case notes
+        type: string
+        example:  case notes
+        readOnly: true
+  CaseHistoryPaginated:
+    title: Case History Paginated
+    type: object
+    allOf:
+      - type: object
+        properties:
+          response:
+            type: array
+            items:
+              $ref: '#/definitions/CaseHistory'
+      - $ref: '#/definitions/Pagination'
+  CaseHistory:
+    title:  Case History
+    description:  Case history
+    type: object
+    properties:
+      description:
+        description: Description
+        type: string
+        maxLength: 35
+        example:  Case History1
+      date:
+        description:  Date
+        type: string
+        format: date
+        example: "2021-12-15"
+      user_id:
+        type: string
+        maxLength: 10
+        description: User id
+        example: nljjns1
+      notes:
+        description: History notes
+        type: string
+        example: History notes
+  CaseFinancialTransactionsPaginated:
+    title: Case History Paginated
+    type: object
+    allOf:
+      - type: object
+        properties:
+          response:
+            type: array
+            items:
+              $ref: '#/definitions/CaseFinancialTransaction'
+      - $ref: '#/definitions/Pagination'
+  CaseFinancialTransactionsTotal:
+    title:  Case Financial Transactions
+    description:  Case financial transactions
+    type: object
+    properties:
+      total_posting_amount:
+        type: number
+        format: double
+        description : Posting amount
+        example: 1000.99
+        readOnly: true
+      total_net_posting_amount:
+        type: number
+        format: double
+        description : Net posting amount
+        example: 1000.99
+        readOnly: true
+      total_posting_vat_amount:
+        type: number
+        format: double
+        description : Posting vat amount
+        example: 1000.99
+        readOnly: true
+  CaseFinancialTransaction:
+    title:  Case Financial Transaction
+    description:  Case financial transaction
+    type: object
+    properties:
+      posting_type:
+        description: Posting type
+        type: string
+        maxLength: 35
+        example:  Posting type
+        readOnly: true
+      date_first:
+        description:  Date first
+        type: string
+        format: date
+        example: "2021-12-15"
+        readOnly: true
+      date_last:
+        description:  Date last
+        type: string
+        format: date
+        example: "2021-12-15"
+        readOnly: true
+      due_date:
+        description:  Due date
+        type: string
+        format: date
+        example: "2021-12-15"
+        readOnly: true
+      ext_due_date:
+        description:  Extended due date
+        type: string
+        format: date
+        example: "2021-12-15"
+        readOnly: true
+      vat:
+        description: VAT number%
+        type: string
+        maxLength: 35
+        example:  Posting type
+        readOnly: true
+      posting_amount:
+        type: number
+        format: double
+        description : Posting amount
+        example: 1000.99
+        readOnly: true
+      net_posting_amount:
+        type: number
+        format: double
+        description : Net posting amount
+        example: 1000.99
+        readOnly: true
+      posting_vat_amount:
+        type: number
+        format: double
+        description : Posting vat amount
+        example: 1000.99
+        readOnly: true
+  CaseLiability:
+    title:  Case Liability
+    description:  Case liability
+    type: object
+    properties:
+      claim_payment:
+        type: number
+        format: double
+        description : Calculated claim payment
+        example: 1000.99
+        readOnly: true
+      cost_payment:
+        type: number
+        format: double
+        description : Costs incurred for executing claim
+        example: 1000.99
+        readOnly: true
+      other_payments:
+        type: number
+        format: double
+        description : E.g. Legal fees
+        example: 1000.99
+        readOnly: true
+      receipts:
+        type: number
+        format: double
+        description : Money recovered after payments
+        example: 1000.99
+        readOnly: true
+      net_position:
+        type: number
+        format: double
+        description : Claim + cost + other - receipts
+        example: 1000.99
+        readOnly: true
+      total_outstanding_debt:
+        type: number
+        format: double
+        description : Total Outstanding Debt Covered by CLD
+        example: 1000.99
+        readOnly: true
+      guaranteed_amount_covered:
+        type: number
+        format: double
+        description : Guaranteed Amount Covered
+        example: 1000.99
+        readOnly: true
+  PotentialDispute:
+    title:  Potential Dispute
+    description:  Potential Dispute
+    type: object
+    properties:
+      potential_dispute_flag:
+        description: Potential dispute flag Y/N
+        example: Y
+        type: boolean
+        readOnly: false
+      potential_dispute_explanation:
+        description: Potential dispute explanation
+        type: string
+        maxLength: 35
+        example:  Potential dispute explanation
+        readOnly: false
+      last_update_user_uid:
+        description: Potential dispute last update user uid
+        type: string
+        maxLength: 10
+        example:  nljjns1
+        readOnly: false
+      last_update_user:
+        description: Potential dispute last update user
+        type: string
+        maxLength: 50
+        example:  John Jones
+        readOnly: true
+      update_date:
+        description:  Update date
+        type: string
+        format: date
+        example: "2021-12-15"
+        readOnly: false
+tags:
+  - name: Negative Information
+  - name: External Information
+  - name: External Information - Social Security Debt
+  - name: External Information - Unpaid debts
+  - name: External Information - SNA
